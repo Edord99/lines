@@ -18,7 +18,7 @@ function Interface(app) {
 		this.panelToggles[i].addEventListener("click", self.togglePanel);
 	}
 
-	this.saveButton = document.getElementById("save");
+/*	this.saveButton = document.getElementById("save");
 	this.saveButton.addEventListener("click", function() {
 		app.data.saveFramesToFile(false)
 	});
@@ -29,7 +29,23 @@ function Interface(app) {
 	});
 
 	this.openButton = document.getElementById("open");
-	this.openButton.addEventListener("click", app.data.loadFramesFromFile);
+	this.openButton.addEventListener("click", app.data.loadFramesFromFile);*/
+
+	var v = new Vue({
+		el: "#vue",
+		data: {
+			nav: [
+				{ text: "Open", event: "open"},
+				{ text: "Save", event: "open"},
+				{ text: "Save Frame", event: "open"}
+			]
+		},
+		methods: {
+			open: function() {
+				app.data.saveFramesToFile(false);
+			}
+		}
+	});
 
 	this.title = document.getElementById("title");
 	this.setTitle = function(text) {
