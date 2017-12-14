@@ -18,71 +18,56 @@ function Interface(app) {
 		this.panelToggles[i].addEventListener("click", self.togglePanel);
 	}
 
-	this.saveButton = document.getElementById("save");
-	this.saveButton.addEventListener("click", function() {
-		app.data.saveFramesToFile(false)
+	this.interfaces = {};
+
+	/* using key command as key for interfaces object,
+		this seems specific not extensible?? */
+	this.interfaces["s"] = new UI("save", "click", function() {
+		app.data.saveFramesToFile(false);
 	});
 
-	this.saveFrameButton = document.getElementById("save-frame");
-	this.saveFrameButton.addEventListener("click", function() {
-		app.data.saveFramesToFile(true)
+	this.interfaces["shift-s"] = new UI("save-frame", "click", function() {
+		app.data.saveFramesToFile(true);
 	});
 
-	this.openButton = document.getElementById("open");
-	this.openButton.addEventListener("click", app.data.loadFramesFromFile);
+	this.interfaces["o"] = new UI("open", "click", app.data.loadFramesFromFile);
 
-	this.title = document.getElementById("title");
-	this.setTitle = function(text) {
-		self.title.value = text;
-	}
-	
-	this.playButton = document.getElementById("play");
-	this.playButton.addEventListener("click", function() {
-		app.draw.isPlaying = true;
-	});
+	this.title = new UIInput("title");
 
-	this.pauseButton = document.getElementById("pause");
-	this.pauseButton.addEventListener("click", function() {
-		app.draw.isPlaying = false;
-		self.updateFrameNum();
-	});
+	this.interfaces["space"] = new UIToggleButton("play", "click", app.draw.toggle, "Play", "Pause");
 
-	this.framesPanel = document.getElementById("frames");
-	this.plusFrame = document.getElementsByClassName("plusframe")[0]; /* plus frame is unsaved drawing frame */
-	this.frameNumDisplay = document.getElementById("frame");
-	this.frameElems = document.getElementsByClassName("frame");
 
-	this.explodeButton = document.getElementById("explode");
-	this.explodeButton.addEventListener("click", function() {
+	this.framesPanel = new UI("frames");
+	this.plusFrame = new UI("current"); /* plus frame is unsaved drawing frame */
+	this.frameNumDisplay = new UIDisplay("frame");
+	this.frameElems = new UIList("frame");
+
+	this.interfaces["a"] = new UI("explode", "click", function() {
 		app.data.explode(false, false);
 	});
 
-	this.followButton = document.getElementById("follow");
-	this.followButton.addEventListener("click", function() {
+	this.interfaces["shift-a"] = new UI("follow", "click", function() {
 		app.data.explode(true, false);
 	});
 
-	this.explodeOverButton = document.getElementById("explode-over");
-	this.explodeOverButton.addEventListener("click", function() {
+	/* this maybe just doesn't work?? */
+	this.interfaces["ctrl-a"] = new UI("explode-over", "click", function() {
 		app.data.explode(false, true);
 	});
 
-	this.followOverButton = document.getElementById("follow-over");
-	this.followOverButton.addEventListener("click", function() {
+	this.interfaces["alt-a"] = new UI("follow-over", "click", function() {
 		app.data.explode(true, true);
 	});
 
 	/* updates the frame panel representation of frames, sets current frame, sets copy frames */
 	this.updateFramesPanel = function() {
-		let numFrames = self.frameElems.length;
+		const numFrames = self.frameElems.getLength();
 		/* this creates frames that don't already exist
 		loop from the num of already made html frames to frames.length */
 		if (app.data.frames.length > numFrames) {
 			for (let i = numFrames; i < app.data.frames.length; i++) {
 				const frmElem = document.createElement("div");
 				frmElem.classList.add("frame");
-				frmElem.id = "fr" + i;
-				frmElem.dataset.index = i;
 				frmElem.textContent = i;
 				/* 
 				add drawing nums, do this later after figuring out lines/frames/drawings 
@@ -93,7 +78,6 @@ function Interface(app) {
 				*/
 				/* click on frame, set the current frame */
 				frmElem.onclick = function(ev) {
-					ev.preventDefault();
 					app.draw.currentFrame = app.draw.currentFrameCounter = i;
 					self.updateFrameNum();
 				};
@@ -107,30 +91,28 @@ function Interface(app) {
 						app.data.framesToCopy.push(i);
 					}
 				};
-				this.framesPanel.insertBefore(frmElem, self.plusFrame);
+				/* this is probably only happening here ... */
+				this.framesPanel.el.insertBefore(frmElem, self.plusFrame.el);
 			}
 		} else {
 			/* if there are same number of less then frames than frame divs */
 			/* this seems to only happen when deleting the current frame so i'm confused.... 
-			delete frame should always be the current frame, is there another way to delete frames */
+			delete frame should always be the current frame, is there another way to delete frames?  */
 			for (let i = numFrames; i > app.data.frames.length; i--){
-				/* remove html frame, make the plus frame the current frame */
-				let removeFrame = document.getElementById("fr" + (i - 1));
-				/* check if deleted frame is the current frame */
-				if (removeFrame.classList.contains("current")) this.plusFrame.classList.add("current");
-				removeFrame.remove();
+				/* remove html frame */
+				this.frameElems.remove(i-1);
 			}
 		}
 		this.updateFrameNum();
 	};
 
 	this.updateFrameNum = function() {
-		this.frameNumDisplay.textContent = app.draw.currentFrame;
-		const currentElem = document.querySelector(".current");
-		currentElem.classList.remove("current");
-		const newElem = document.querySelector('#fr' + app.draw.currentFrame);
-		if (newElem != null) newElem.classList.add("current");
-		else this.plusFrame.classList.add("current");
+		this.frameNumDisplay.set(app.draw.currentFrame);
+		document.getElementById("current").removeAttribute("id"); /* fine for now... */
+		if (self.frameElems.els[app.draw.currentFrame])
+			self.frameElems.setId("current", app.draw.currentFrame);
+		else 
+			this.plusFrame.setId("current");
 	};
 
 	/* is this interface or drawing... 

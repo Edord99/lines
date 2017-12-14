@@ -144,10 +144,14 @@ function Data(app) {
 	this.deleteFrame = function() {
 		/* also here, should drawings (not used elsewhere) be deleted? */
 		const ftemp = app.draw.currentFrame;
-		if (app.draw.currentFrame > 0) app.interface.prevFrame();
-		if (self.frames[ftemp] && self.frames.length > 0) self.frames.splice(ftemp, 1);
-		else if (self.frame[ftemp]) self.clearFrame();
-		else self.lines = [];
+		if (app.draw.currentFrame > 0) 
+			app.interface.prevFrame();
+		if (self.frames[ftemp] && self.frames.length > 0) 
+			self.frames.splice(ftemp, 1);
+		else if (self.frame[ftemp]) 
+			self.clearFrame();
+		else 
+			self.lines = [];
 		app.interface.updateFramesPanel();
 	};
 
@@ -203,10 +207,11 @@ function Data(app) {
 		follow means they don't accumulate to form drawing at the end
 		over means go over/add to subsequent frames
 		no key command - t y u p j l n available */
-	/* a: explode, shift a: follow */
+	/* a: explode, shift a: follow, ctrl a: explode over, alt a: follow over */
+	/* over states get fucked up with two drawings, need to figure
+		out after adding drawing nums to frames in v2 */
 	this.explode = function(follow, over) {
-		console.log(follow, over);
-		if (self.frames[app.draw.currentFrame] == undefined) self.saveLines();
+		self.saveLines();
 		const segmentsPerFrame = Number(prompt("Enter number of segments per frame: "));
 		if (segmentsPerFrame > 0) {
 			const tempFrames = _.cloneDeep(self.frames[app.draw.currentFrame]);
@@ -334,9 +339,10 @@ function Data(app) {
 		json.d = [];
 		let drawingsIndexes = [];
 
+		/* don't save stuff with nothing in it .... */
+
 		/* save current frame */  
-		/* this didn't work start here next */
-		if (single) {
+		if (single && self.frames[app.draw.currentFrame]) {
 			json.f.push( self.frames[app.draw.currentFrame] );
 			for (let j = 0; j < self.frames[app.draw.currentFrame].length; j++) {
 				if ( drawingsIndexes.indexOf(self.frames[app.draw.currentFrame][j].d) == -1 ) 
@@ -352,6 +358,7 @@ function Data(app) {
 				}
 			}
 		}
+
 		for (let i = 0; i < self.drawings.length; i++) {
 			if ( drawingsIndexes.indexOf(i) != -1 ) 
 				json.d.push( self.drawings[i] );
@@ -368,26 +375,28 @@ function Data(app) {
 			const blob = new Blob([jsonfile], {type:"application/x-download;charset=utf-8"});
 			saveAs(blob, filename+".json");
 		}
+
 	};
 
 	/* o key */
 	this.loadFramesFromFile = function() {
-		
 		const filename = prompt("Open file:");
-		app.interface.setTitle(filename.split("/").pop());
-		$.getJSON(filename + ".json", function(data) {
-			self.frames =  data.f;
-			self.drawings = data.d;
-			for (let i = 0; i < self.drawings.length; i++) {
-				if (self.drawings[i] != 'x') app.color.addColorBtn( self.drawings[i].c );
-			}
-			app.canvas.setWidth(data.w);
-			app.canvas.setHeight(data.h);
-			app.draw.setFps(data.fps);
-			app.draw.reset();
-		}).error(function(error) {
-	        console.error("Loading error:", error.statusText, error);
-	    });
+		if (filename) {
+			app.interface.title.setValue(filename.split("/").pop());
+			$.getJSON(filename + ".json", function(data) {
+				self.frames =  data.f;
+				self.drawings = data.d;
+				for (let i = 0; i < self.drawings.length; i++) {
+					if (self.drawings[i] != 'x') app.color.addColorBtn( self.drawings[i].c );
+				}
+				app.canvas.setWidth(data.w);
+				app.canvas.setHeight(data.h);
+				app.draw.setFps(data.fps);
+				app.draw.reset();
+			}).error(function(error) {
+				console.error("Loading error:", error.statusText, error);
+			});
+		}
 	};
 
 
