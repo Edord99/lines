@@ -41,7 +41,7 @@ function Background() {
 	
 	panel.addRow();
 	panel.add( new UIToggleButton({
-		callback: this.toggle, 
+		callback: this.toggle,
 		key: "b", 
 		on: "Hide", 
 		off: "Show" 

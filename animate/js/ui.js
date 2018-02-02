@@ -35,29 +35,26 @@ class UI {
 			Lines.interface.panels["keys"].el.appendChild(document.createElement("br"));
 		}
 	}
-
 	addClass(clas) {
 		this.el.classList.add(clas);
 	}
-
 	setId(id) {
 		this.el.id = id;
 	}
-
+	addData(key, value) {
+		this.el.dataset[key] = value;
+	}
 	setValue(value) {
 		this.el.value = value;
 	}
-
 	getValue() {
 		return this.el.value;
 	}
-
 	addLabel() {
 		const label = document.createElement("span");
 		label.textContent = this.label;
 		this.el.parentNode.insertBefore(label, this.el);
 	}
-
 	append(elem) {
 		this.el.appendChild(elem);  /* only used for color ways? */
 	}
@@ -108,6 +105,15 @@ class Panel {
 		if (component.display) {
 			this.rows[this.rows.length - 1].insertBefore(component.display.el, component.el);
 		}
+	}
+}
+
+class UIFrame extends UI {
+	constructor(params) {
+		super(params);
+		this.el.classList.add("frame");
+		this.el.textContent = params.title;
+		this.el.dataset.index = params.index;
 	}
 }
 
@@ -224,15 +230,19 @@ class UIToggleButton extends UI {
 
 /* basically just for framesPanel */
 class UIList {
-	constructor(params) {
-		this.els = document.getElementsByClassName(params.class);
+	constructor() {
+		//this.els = document.getElementsByClassName(params.class);
+		this.uis = [];
+	}
+	addUI(ui) {
+		this.uis.push(ui);
 	}
 	getLength() {
-		return this.els.length;
+		return this.uis.length;
 	}
 	addClass(clas) {
-		for (let i = 0; i < this.els.length; i++) {
-			const elem = this.els[i];
+		for (let i = 0; i < this.uis.length; i++) {
+			const elem = this.uis[i].el;
 			if (!elem.classList.contains(clas)){
  				elem.classList.add(clas);
  			}
@@ -240,16 +250,16 @@ class UIList {
 	}
 	setId(id, index) {
 		if (index != undefined) {
-			this.els[index].setAttribute('id', id);
+			this.uis[index].setId(id);
 		}
 	}
 	remove(index) {
-		this.els[index].remove();
+		this.uis[index].el.remove();
+		this.uis.splice(index, 1);
 	}
 	looper(callback) {
-		for (let i = 0; i < this.els.length; i++) {
-			const elem = this.els[i];
-			callback(elem);
+		for (let i = 0; i < this.uis.length; i++) {
+			callback(this.uis[i].el);
 		}
 	}
 }
