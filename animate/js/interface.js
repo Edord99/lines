@@ -33,18 +33,34 @@ function Interface() {
 			}
 		};
 
-		const expand = document.createElement('div');
-		expand.textContent = ">";
-		frm.append(expand);
-		expand.onclick = function() {
-			if (this.textContent == ">") {
-				this.textContent = "<";
-				this.parentNode.style.width = "100px";
-			} else {
-				this.textContent = ">";
-				this.parentNode.style.width = "auto";
+		frm.appendUI( new UIToggleButton({
+			on: ">",
+			off: "<",
+			event: "click",
+			/*type: "div",*/
+			callback: function() {
+				if (this.textContent == ">") {
+					/*this.parentNode.style.width = "100px";*/
+					const index = frm.getData("index");
+					const drawings = Lines.frames[index];
+					for (let i = 0; i < drawings.length; i++) {
+						const d = new UIDisplay({initial:"d: " + drawings[i].d})
+						frm.appendUI(d);
+						frm.appendUI( new UIButton({
+							title: "x",
+							callback: function() {
+								Lines.frames[index].splice(i, 1);
+								d.remove();
+								this.remove();
+							}
+						}));
+						// frm.appendUI( new UIToggleButton({ }));
+					}
+				} else {
+					
+				}
 			}
-		}
+		}) );
 
 		/* this is probably only happening here ... */
 		/* do this w UI List? */

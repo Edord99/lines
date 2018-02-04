@@ -44,6 +44,9 @@ class UI {
 	addData(key, value) {
 		this.el.dataset[key] = value;
 	}
+	getData(key) {
+		return this.el.dataset[key];
+	}
 	setValue(value) {
 		this.el.value = value;
 	}
@@ -57,6 +60,12 @@ class UI {
 	}
 	append(elem) {
 		this.el.appendChild(elem);  /* only used for color ways? */
+	}
+	appendUI(ui) {
+		this.el.appendChild(ui.el);
+	}
+	remove() {
+		this.el.remove();
 	}
 }
 
@@ -212,7 +221,8 @@ class UISelect extends UI {
 
 class UIToggleButton extends UI {
 	constructor(params) {
-		params.type = "span";
+		if (!params.type) 
+			params.type = "span";
 		params.event = "click";
 		super(params);
 		this.el.classList.add("btn");
