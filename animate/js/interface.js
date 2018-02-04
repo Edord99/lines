@@ -54,6 +54,17 @@ function Interface() {
 								this.remove();
 							}
 						}));
+						const v = new UIToggleButton({
+							on: "V",
+							off: "#",
+							callback: function() {
+								if (v.isOn)
+									Lines.drawings[drawings[i].d].c = "00ff00";
+								else
+									Lines.drawings[drawings[i].d].c = "000000";
+							}
+						})
+						frm.appendUI(v);
 						// frm.appendUI( new UIToggleButton({ }));
 					}
 				} else {
