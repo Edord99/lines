@@ -63,6 +63,7 @@ function Interface(app) {
 	};
 
 	this.createUI = function(data, module, panel) {
+
 		const params = { key: data.key, ...data.params };
 		for (const k in data.fromModule) {
 			params[k] = module[data.fromModule[k]];

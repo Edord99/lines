@@ -773,6 +773,27 @@
 				"params": {
 					"text": "Toggle All"
 				}
+			},
+			{
+				"type": "UIButton",
+				"key": "g",
+				"fromModule": {
+					"callback": "drawLayers"
+				},
+				"params": {
+					"text": "Draw"
+				}
+			},
+			{
+				"type": "UIToggle",
+				"key": "shift-g",
+				"fromModule": {
+					"callback": "toggleCanvas"
+				},
+				"params": {
+					"onText": "Close Layers",
+					"offText": "Open Layers"
+				}
 			}
 		]
 	},

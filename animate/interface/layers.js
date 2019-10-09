@@ -259,40 +259,140 @@ function Layers() {
 
 	this.canvas = new Canvas("draw-layers", 0, 0, '#F2F4F4');
 
-	/* do this with real ui later*/
-	this.toggleCanvas = new UIToggle({
+	/* do this with real ui later */
+	this.toggleCanvas = function() {
+		if (self.canvas.canvas.style.display != 'none') self.canvas.canvas.style.display = 'none';
+		else self.canvas.canvas.style.display = '';
+	};
+
+	const barf = new UIToggle({
 		id: 'toggle-layers',
 		onText: "Close Layers",
 		offText: "Open Layers",
-		callback: function() {
-			if (this.isOn) self.canvas.canvas.style.display = 'none';
-			else self.canvas.canvas.style.display = '';
-		}
+		callback: self.toggleCanvas
 	});
 
+
+	this.updateInterval;
+	this.alayers = [];
+	this.aframes = [];
+	this.can = {};
+
+	/* g key */
 	this.drawLayers = function() {
-		const maxWidth = 60;
-		const w = Math.min(640, self.canvas.canvas.parentElement.offsetWidth);
-		const row = 4;
-		const h = row * (lns.anim.layers.length + 1);
-		self.canvas.setHeight(h);
-		const col = Math.min(maxWidth, w / (lns.anim.plusFrame));
-		self.canvas.setWidth(Math.min(w, col * lns.anim.plusFrame));
+		
+		const maxWidth = 60; /* largest w of one frame */
+		const width = Math.min(640, self.canvas.canvas.parentElement.offsetWidth); /* width of layer canvas */
+		const row = 16; /* base height */
+		const height = row * (lns.anim.layers.length + 1);
+		
+		
+		const col = Math.min(maxWidth, width / (lns.anim.plusFrame));
+		
+		self.can = { w: width, h: height };
 
 		for (let i = 0; i < lns.anim.plusFrame; i++) {
 			const x = i * col;
-			if (i == lns.anim.currentFrame) self.canvas.ctx.fillStyle = '#FF79FF';
-			else self.canvas.ctx.fillStyle = '#fdf';
-			self.canvas.ctx.fillRect((i * col) + col/20, h - 5, col - col/10, 4);
+			const y = height - row;
+			const w = col;
+			const h = row;
+			
+			if (!self.aframes[i])
+				self.aframes[i] = new AFrame(x, y, w, h, i, function() {
+					lns.render.setFrame(i);
+					self.drawLayers();
+				});
+			else self.aframes[i].update(x, y, w, h);
+			
+			if (i == lns.anim.currentFrame) this.aframes[i].select();
+			else this.aframes[i].unselect();
 		}
 
 		for (let i = 0; i < lns.anim.layers.length; i++) {
 			const layer = lns.anim.layers[i];
-			const x = layer.f.s * col + 1;
-			const y = i * row + row/20;
-			const _w = (layer.f.e - layer.f.s + 1) * col - 2;
-			self.canvas.ctx.fillStyle = '#ADD8E6';
-			self.canvas.ctx.fillRect(x, y, _w, row - 1);
+			const x = layer.startFrame * col;
+			const y = i * row;
+			const w = (layer.endFrame - layer.startFrame + 1) * col;
+			const h = row - 1;
+
+			if (!self.alayers[i]) 
+				self.alayers[i] = new ALayer(x, y, w, h, function(side, dir, dif) {
+					if (side == 'left' && layer.startFrame > 0) {
+						layer.startFrame += (1 + Math.floor(dif / col)) * dir;
+					}
+					if (side == 'right' && layer.endFrame < lns.anim.endFrame) {
+						layer.endFrame += (1 + Math.floor(dif / col)) * dir;
+					}
+					self.drawLayers();
+				});
+			else self.alayers[i].update(x, y, w, h);
+		}
+
+		if (!self.updateInterval) {
+			self.updateInterval = setInterval(self.updateLayers, 1000 / 30);
 		}
 	};
+
+
+	this.updateLayers = function() {
+		self.canvas.setHeight(self.can.h);
+		self.canvas.setWidth(self.can.w);
+		self.canvas.ctx.fillStyle = 'white';
+		self.canvas.ctx.fillRect(0, 0, self.can.w, self.can.h);
+
+		for (let i = 0; i < self.alayers.length; i++) {
+			self.alayers[i].display(self.canvas.ctx);
+		}
+
+		for (let i = 0; i < self.aframes.length; i++) {
+			self.aframes[i].display(self.canvas.ctx);
+		}
+	};
+
+	this.mouseMove = function(ev) {
+		for (let i = 0; i < self.alayers.length; i++) {
+			self.alayers[i].over(ev.offsetX, ev.offsetY);
+		}
+		
+		for (let i = 0; i < self.aframes.length; i++) {
+			self.aframes[i].over(ev.offsetX, ev.offsetY);
+		}
+	};
+
+	this.mouseDown = function(ev) {
+		for (let i = 0; i < self.alayers.length; i++) {
+			self.alayers[i].down();
+		}
+		
+		for (let i = 0; i < self.aframes.length; i++) {
+			self.aframes[i].down();;
+		}
+	};
+
+	this.mouseUp = function(ev) {
+		for (let i = 0; i < self.alayers.length; i++) {
+			self.alayers[i].up();
+		}
+		
+		for (let i = 0; i < self.aframes.length; i++) {
+			self.aframes[i].up();;
+		}
+	};
+
+	this.outSideCanvas = function(ev) {
+		if (ev.toElement != self.canvas.canvas) {
+			for (let i = 0; i < self.alayers.length; i++) {
+				self.alayers[i].over(-1, -1);
+			}
+		
+			for (let i = 0; i < self.aframes.length; i++) {
+				self.aframes[i].over(-1, -1);
+			}
+		}
+	};
+
+	self.canvas.canvas.addEventListener('mousemove', self.mouseMove);
+	document.addEventListener('mousemove', self.outSideCanvas);
+	self.canvas.canvas.addEventListener('mousedown', self.mouseDown);
+	self.canvas.canvas.addEventListener('mouseup', self.mouseUp);
 }
