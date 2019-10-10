@@ -257,7 +257,7 @@ function Layers() {
 		}
 	};
 
-	this.canvas = new Canvas("draw-layers", 0, 0, '#F2F4F4');
+	this.canvas = new Canvas("draw-layers", 0, 0);
 
 	/* do this with real ui later */
 	this.toggleCanvas = function() {
@@ -276,7 +276,7 @@ function Layers() {
 	this.updateInterval;
 	this.alayers = [];
 	this.aframes = [];
-	this.can = {};
+	this.can = { w: 0, h: 0 };
 
 	/* g key */
 	this.drawLayers = function() {
@@ -285,11 +285,19 @@ function Layers() {
 		const width = Math.min(640, self.canvas.canvas.parentElement.offsetWidth); /* width of layer canvas */
 		const row = 16; /* base height */
 		const height = row * (lns.anim.layers.length + 1);
-		
-		
 		const col = Math.min(maxWidth, width / (lns.anim.plusFrame));
 		
-		self.can = { w: width, h: height };
+
+		console.log(width, height);
+
+		if (self.can.w != width || self.can.h != height) {
+			self.can.w = width;
+			self.can.h = height;
+			self.canvas.setWidth(width);
+			self.canvas.setHeight(height);
+		}
+
+		console.log(self.can);
 
 		for (let i = 0; i < lns.anim.plusFrame; i++) {
 			const x = i * col;
@@ -297,12 +305,18 @@ function Layers() {
 			const w = col;
 			const h = row;
 			
-			if (!self.aframes[i])
-				self.aframes[i] = new AFrame(x, y, w, h, i, function() {
-					lns.render.setFrame(i);
-					self.drawLayers();
-				});
-			else self.aframes[i].update(x, y, w, h);
+			if (!self.aframes[i]) {
+				self.aframes[i] = new LDFrame(x, y, w, h, i, 
+					{ 
+						onclick: function() {
+							lns.render.setFrame(i);
+							self.drawLayers();
+						}
+					}
+				);
+			} else {
+				self.aframes[i].update(x, y, w, h);
+			}
 			
 			if (i == lns.anim.currentFrame) this.aframes[i].select();
 			else this.aframes[i].unselect();
@@ -315,16 +329,22 @@ function Layers() {
 			const w = (layer.endFrame - layer.startFrame + 1) * col;
 			const h = row - 1;
 
-			if (!self.alayers[i]) 
-				self.alayers[i] = new ALayer(x, y, w, h, function(side, dir, dif) {
-					if (side == 'left' && layer.startFrame > 0) {
-						layer.startFrame += (1 + Math.floor(dif / col)) * dir;
+			if (!self.alayers[i]) {
+				self.alayers[i] = new LDLayer(x, y, w, h, `d-${layer.d}`,
+					{
+						ondrag: function(side, dir, dif) {
+							if (side == 'left' && layer.startFrame > 0) {
+								layer.startFrame += (1 + Math.floor(dif / col)) * dir;
+							}
+							if (side == 'right' && layer.endFrame < lns.anim.endFrame) {
+								layer.endFrame += (1 + Math.floor(dif / col)) * dir;
+							}
+							self.drawLayers();
+						},
+						onclick: layer.toggle.bind(layer)
 					}
-					if (side == 'right' && layer.endFrame < lns.anim.endFrame) {
-						layer.endFrame += (1 + Math.floor(dif / col)) * dir;
-					}
-					self.drawLayers();
-				});
+				);
+			}
 			else self.alayers[i].update(x, y, w, h);
 		}
 
@@ -335,8 +355,7 @@ function Layers() {
 
 
 	this.updateLayers = function() {
-		self.canvas.setHeight(self.can.h);
-		self.canvas.setWidth(self.can.w);
+		
 		self.canvas.ctx.fillStyle = 'white';
 		self.canvas.ctx.fillRect(0, 0, self.can.w, self.can.h);
 
