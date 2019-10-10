@@ -21,12 +21,12 @@ function animateInterface(ui) {
 		ui.updateFrameNum();
 		ui.layers.resetLayers();
 		ui.drawings.resetDrawings();
-		ui.layers.drawLayers();
+		ui.layers.update();
 		ui.updateFramesPanel();
 	};
 
 	ui.plusFrame = new UIButton({
-		id:"current",
+		id: "current",
 		class: "plus",
 		callback: function() {
 			ui.setFrame(lns.anim.plusFrame);
@@ -90,8 +90,6 @@ function animateInterface(ui) {
 			document.getElementById("current").removeAttribute("id");
 		if (ui.framesPanel.children[lns.anim.currentFrame]) 
 			ui.framesPanel.setId("current", lns.anim.currentFrame);
-		else
-			ui.plusFrame.setId("current");
 		ui.faces.frameDisplay.value = lns.anim.currentFrame;
 	};
 

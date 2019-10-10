@@ -79,13 +79,9 @@ function Layers() {
 				row.add(new UIButton({
 					text: "+",
 					callback: function() {
-						const n = new Layer(_.cloneDeep(layer));
-						n.f.s = n.f.e = lns.anim.currentFrame + 1;
-						layer.f.e = lns.anim.currentFrame;
-						lns.anim.layers.push(n);
-						lns.ui.nextFrame();
+						self.splitLayer(layer);
 					}
-				})); /* duplicate */
+				})); /* duplicate/ split */
 
 				row.add(new UIButton({
 					text: 'x',
@@ -222,6 +218,14 @@ function Layers() {
 		/* how to make ui react here ??? */
 	};
 
+	this.splitLayer = function(layer) {
+		const newLayer = new Layer(_.cloneDeep(layer));
+		newLayer.startFrame = newLayer.endFrame = lns.anim.currentFrame + 1;
+		layer.endFrame = lns.anim.currentFrame;
+		lns.anim.layers.push(newLayer);
+		lns.ui.nextFrame();
+	};
+
 	/* z */
 	this.cutLayerSegment = function() {
 		for (let i = 0; i < self.layers.length; i++) {
@@ -257,7 +261,7 @@ function Layers() {
 		}
 	};
 
-	this.canvas = new Canvas("draw-layers", 0, 0);
+	this.canvas = new Canvas("draw-layers", 0, 0, '#ffffff', true);
 
 	/* do this with real ui later */
 	this.toggleCanvas = function() {
@@ -279,7 +283,7 @@ function Layers() {
 	this.can = { w: 0, h: 0 };
 
 	/* g key */
-	this.drawLayers = function() {
+	this.update = function() {
 		
 		const maxWidth = 60; /* largest w of one frame */
 		const width = Math.min(640, self.canvas.canvas.parentElement.offsetWidth); /* width of layer canvas */
@@ -287,17 +291,12 @@ function Layers() {
 		const height = row * (lns.anim.layers.length + 1);
 		const col = Math.min(maxWidth, width / (lns.anim.plusFrame));
 		
-
-		console.log(width, height);
-
 		if (self.can.w != width || self.can.h != height) {
 			self.can.w = width;
 			self.can.h = height;
 			self.canvas.setWidth(width);
 			self.canvas.setHeight(height);
 		}
-
-		console.log(self.can);
 
 		for (let i = 0; i < lns.anim.plusFrame; i++) {
 			const x = i * col;
@@ -309,8 +308,8 @@ function Layers() {
 				self.aframes[i] = new LDFrame(x, y, w, h, i, 
 					{ 
 						onclick: function() {
-							lns.render.setFrame(i);
-							self.drawLayers();
+							lns.ui.setFrame(i);
+							self.update();
 						}
 					}
 				);
@@ -327,34 +326,21 @@ function Layers() {
 			const x = layer.startFrame * col;
 			const y = i * row;
 			const w = (layer.endFrame - layer.startFrame + 1) * col;
-			const h = row - 1;
+			const h = row;
 
 			if (!self.alayers[i]) {
-				self.alayers[i] = new LDLayer(x, y, w, h, `d-${layer.d}`,
-					{
-						ondrag: function(side, dir, dif) {
-							if (side == 'left' && layer.startFrame > 0) {
-								layer.startFrame += (1 + Math.floor(dif / col)) * dir;
-							}
-							if (side == 'right' && layer.endFrame < lns.anim.endFrame) {
-								layer.endFrame += (1 + Math.floor(dif / col)) * dir;
-							}
-							self.drawLayers();
-						},
-						onclick: layer.toggle.bind(layer)
-					}
-				);
+				self.alayers[i] = new LDLayer(x, y, w, h, layer);
 			}
 			else self.alayers[i].update(x, y, w, h);
 		}
 
 		if (!self.updateInterval) {
-			self.updateInterval = setInterval(self.updateLayers, 1000 / 30);
+			self.updateInterval = setInterval(self.draw, 1000 / 30);
 		}
 	};
 
 
-	this.updateLayers = function() {
+	this.draw = function() {
 		
 		self.canvas.ctx.fillStyle = 'white';
 		self.canvas.ctx.fillRect(0, 0, self.can.w, self.can.h);
@@ -384,17 +370,17 @@ function Layers() {
 		}
 		
 		for (let i = 0; i < self.aframes.length; i++) {
-			self.aframes[i].down();;
+			self.aframes[i].down();
 		}
 	};
 
 	this.mouseUp = function(ev) {
 		for (let i = 0; i < self.alayers.length; i++) {
-			self.alayers[i].up();
+			// self.alayers[i].up();
 		}
 		
 		for (let i = 0; i < self.aframes.length; i++) {
-			self.aframes[i].up();;
+			// self.aframes[i].up();;
 		}
 	};
 

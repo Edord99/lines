@@ -1,12 +1,10 @@
 class LDRange extends LDBase {
-	constructor(x, y, w, h, functions) {
+	constructor(x, y, w, h) {
 		super(x, y, w, h)
 		this.fill = this.color = colors.lightblue;
 		this.highlight = colors.middleblue;
 		this.selectColor = colors.brightblue;
 		this.dragColor = colors.purpleblue;
-		this.ondrag = functions.ondrag;
-		this.onclick = functions.onclick;
 	}
 
 	down() {
