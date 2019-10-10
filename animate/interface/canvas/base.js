@@ -27,9 +27,9 @@ class LDBase {
 		}
 	}
 
-	display(ctx) {
-		ctx.fillStyle = this.fill;
-		ctx.fillRect(this.x, this.y, this.w, this.h);
+	display() {
+		lns.ui.layers.canvas.ctx.fillStyle = this.fill;
+		lns.ui.layers.canvas.ctx.fillRect(this.x, this.y, this.w, this.h);
 	}
 
 	select() {

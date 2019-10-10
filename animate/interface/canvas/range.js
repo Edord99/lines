@@ -30,16 +30,16 @@ class LDRange extends LDBase {
 		this.dragging = false;
 	}
 
-	display(ctx) {
-		super.display(ctx);
+	display() {
+		super.display();
 
 		if (this.left) {
-			ctx.fillStyle = this.dragColor;
-			ctx.fillRect(this.x, this.y, 4, this.h);
+			lns.ui.layers.canvas.ctx.fillStyle = this.dragColor;
+			lns.ui.layers.canvas.ctx.fillRect(this.x, this.y, 4, this.h);
 		}
 		if (this.right) {
-			ctx.fillStyle = this.dragColor;
-			ctx.fillRect(this.x + this.w - 4, this.y, 4, this.h);
+			lns.ui.layers.canvas.ctx.fillStyle = this.dragColor;
+			lns.ui.layers.canvas.ctx.fillRect(this.x + this.w - 4, this.y, 4, this.h);
 		}
 	}
 
@@ -60,5 +60,6 @@ class LDRange extends LDBase {
 			if (!this.dragging) this.left = false;
 			if (!this.dragging) this.right = false;
 		}
+
 	}
 }

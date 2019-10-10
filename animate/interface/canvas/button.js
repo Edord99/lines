@@ -15,8 +15,8 @@ class LDButton extends LDBase {
 
 	display(ctx) {
 		super.display(ctx);
-		ctx.font = '12px monospace';
-		ctx.fillStyle = 'black';
-		ctx.fillText(this.label, this.x + 2, this.y + this.h - 2);
+		lns.ui.layers.canvas.ctx.font = '12px monospace';
+		lns.ui.layers.canvas.ctx.fillStyle = 'black';
+		lns.ui.layers.canvas.ctx.fillText(this.label, this.x + 2, this.y + this.h - 2);
 	}
 }

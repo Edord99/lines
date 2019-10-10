@@ -218,10 +218,9 @@ function Layers() {
 		/* how to make ui react here ??? */
 	};
 
-	this.splitLayer = function(layer) {
+	this.duplicate = function(layer) {
 		const newLayer = new Layer(_.cloneDeep(layer));
-		newLayer.startFrame = newLayer.endFrame = lns.anim.currentFrame + 1;
-		layer.endFrame = lns.anim.currentFrame;
+		newLayer.startFrame = newLayer.endFrame = layer.endFrame + 1;
 		lns.anim.layers.push(newLayer);
 		lns.ui.nextFrame();
 	};
@@ -346,11 +345,11 @@ function Layers() {
 		self.canvas.ctx.fillRect(0, 0, self.can.w, self.can.h);
 
 		for (let i = 0; i < self.alayers.length; i++) {
-			self.alayers[i].display(self.canvas.ctx);
+			self.alayers[i].display();
 		}
 
 		for (let i = 0; i < self.aframes.length; i++) {
-			self.aframes[i].display(self.canvas.ctx);
+			self.aframes[i].display();
 		}
 	};
 
@@ -376,7 +375,7 @@ function Layers() {
 
 	this.mouseUp = function(ev) {
 		for (let i = 0; i < self.alayers.length; i++) {
-			// self.alayers[i].up();
+			self.alayers[i].up();
 		}
 		
 		for (let i = 0; i < self.aframes.length; i++) {

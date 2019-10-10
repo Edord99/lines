@@ -8,41 +8,57 @@ class LDLayer extends LDRange {
 		this.onclick = layer.toggle.bind(layer);
 		this.ondrag = function(side, dir, dif) {
 			if (side == 'left' && layer.startFrame > 0) {
-				layer.startFrame += (1 + Math.floor(dif / col)) * dir;
+				layer.startFrame += (1 + Math.floor(dif / w)) * dir;
 			}
 			if (side == 'right' && layer.endFrame < lns.anim.endFrame) {
-				layer.endFrame += (1 + Math.floor(dif / col)) * dir;
+				layer.endFrame += (1 + Math.floor(dif / w)) * dir;
 			}
 			lns.ui.layers.update();
 		};
 
-		this.split = new LDButton(this.x + this.w, this.y, this.h/2, this.h/2, '+', 
+		this.dup = new LDButton(x + w, y, h/2, h/2, '+', 
 			{
 				onclick: function() {
-					console.log(layer)
-					lns.ui.layers.splitLayer(layer);
+					lns.ui.layers.duplicate(layer);
 				}
 			}
 		);
+
+		this.anim = new LDButton(x + w, y + h/2, h/2, h/2, 'a',
+		{
+			onclick: function() {
+				/* add tween range */
+			}
+		});
 	}
 
-	display(ctx) {
-		super.display(ctx);
-		ctx.font = '10px sans-serif';
-		ctx.fillStyle = '#F0F7FF';
-		ctx.fillText(this.label, this.x + 2, this.y + this.h - 2);
+	display() {
+		super.display();
+		lns.ui.layers.canvas.ctx.font = '10px sans-serif';
+		lns.ui.layers.canvas.ctx.fillStyle = '#F0F7FF';
+		lns.ui.layers.canvas.ctx.fillText(this.label, this.x + 2, this.y + this.h - 2);
 
-		this.split.display(ctx);
+		this.dup.display();
+		this.anim.display();
 	}
 
 	over(x, y) {
 		super.over(x, y);
-		this.split.over(x, y);
+		this.dup.over(x, y);
+		this.anim.over(x, y);
+
 	}
 
 	down() {
 		super.down();
-		// console.log(this.split.mouseIsOver);
-		this.split.down();
+		this.dup.down();
+		this.anim.down();
+
+	}
+
+	update(x, y, w, h) {
+		super.update(x, y, w, h);
+		this.dup.update(x + w, y, h/2, h/2);
+		this.anim.update(x + w, y + h/2, h/2, h/2);
 	}
 }
