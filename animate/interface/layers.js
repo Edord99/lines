@@ -66,7 +66,6 @@ function Layers() {
 
 				row.add(new UILabel({ text: 'E' }));
 				row.add(new UIText({
-					blur: true,
 					value: layer.f.e,
 					callback: function(value) {
 						layer.endFrame = +value;
@@ -142,7 +141,6 @@ function Layers() {
 					aRow.add(new UIText({
 						label: 'sv',
 						value: a.sv,
-						blur: true,
 						callback: function(value) {
 							a.sv = +value;
 						}
@@ -151,7 +149,6 @@ function Layers() {
 					aRow.add(new UIText({
 						label: 'ev',
 						value: a.ev,
-						blur: true,
 						callback: function(value) {
 							a.ev = +value;
 						}

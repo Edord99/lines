@@ -7,4 +7,9 @@ window.colors = {
 	middleblue: '#B1FCFB',
 	brightblue: '#CAFFF6',
 	purpleblue: '#AEAAF2'
+
+	lightgreen: '#F0FFFA',
+	middlegreen: '#528070',
+	brightgreen: '#6EFFCE',
+	darkgreen: '#78807D'
 };

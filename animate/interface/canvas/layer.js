@@ -7,10 +7,10 @@ class LDLayer extends LDRange {
 
 		this.onclick = layer.toggle.bind(layer);
 		this.ondrag = function(side, dir, dif) {
-			if (side == 'left' && layer.startFrame > 0) {
+			if (side == 'left') {
 				layer.startFrame += (1 + Math.floor(dif / w)) * dir;
 			}
-			if (side == 'right' && layer.endFrame < lns.anim.endFrame) {
+			if (side == 'right') {
 				layer.endFrame += (1 + Math.floor(dif / w)) * dir;
 			}
 			lns.ui.layers.update();
@@ -27,7 +27,9 @@ class LDLayer extends LDRange {
 		this.anim = new LDButton(x + w, y + h/2, h/2, h/2, 'a',
 		{
 			onclick: function() {
-				/* add tween range */
+				const type = prompt('tween property: s, e, n, r, w, v');
+				const tween = new Tween(x, y + h, w, h/2, type);
+				layer.a.push({ prop: type, sf: layer.startFrame, ef: layer.endFrame, sv: 0, ev: 0 });
 			}
 		});
 	}
